@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	
+	<flow name="getAllFlights" doc:id="365f2b01-afc9-48c4-ba5b-f45c28e15694" >
+		<db:select doc:name="Select" doc:id="23e59f89-ca29-474b-93ad-dca3e6daa7e2" config-ref="MySql_Database_Config">
+			<db:sql ><![CDATA[select * from american]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="90ffb487-01b5-430b-8328-a917ea3e94d1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	ID: payload01.ID,
+	code: payload01.code1,
+	price: payload01.price default 0,
+	departureDate: payload01.takeOffDate as String default "",
+	origin: payload01.fromAirport default "",
+	destination: payload01.toAirport default "",
+	emptySeats: payload01.seatsAvailable default 0,
+	plane: {
+		"type": payload01.planeType default "",
+		totalSeats: payload01.totalSeats default 0
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="b421d22f-aafb-4f81-9585-82dd44058383" message="Query executed successfully."/>
+	</flow>
+	<flow name="getFlightById" doc:id="bce0cd61-ea8b-43a5-a448-6ffb58504bad" >
+		<db:select doc:name="Select" doc:id="32a620fd-36a6-404e-b201-266bcb9b3ef2" config-ref="MySql_Database_Config">
+			<db:sql ><![CDATA[select * from american where ID = :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{'id' : attributes.uriParams.ID}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="75a1aff4-88b9-49ab-89f5-d17ed5547685" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	ID: payload01.ID,
+	code: payload01.code1,
+	price: payload01.price default 0,
+	departureDate: payload01.takeOffDate as String default "",
+	origin: payload01.fromAirport default "",
+	destination: payload01.toAirport default "",
+	emptySeats: payload01.seatsAvailable default 0,
+	plane: {
+		"type": payload01.planeType default "",
+		totalSeats: payload01.totalSeats default 0
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="b766a574-949a-4858-8ac3-dbc98e5cea09" message="Get Flights by Id execution completed"/>
+	</flow>
+	<flow name="postFlights" doc:id="d2e39c92-6103-4b69-a20d-942ab493a309" >
+		<ee:transform doc:name="Transform Message" doc:id="8f86c676-b609-4fdf-829e-7ef7b5e0897b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message" : "Flights added successfully (but not really"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="80922a85-840b-426a-ad11-f4f739bc6847" message="Post Flight executed successfully"/>
+	</flow>
+	<flow name="deleteFlightById" doc:id="bc015660-6307-4587-a7c1-cf0180908927" >
+		<ee:transform doc:name="Transform Message" doc:id="15406638-1cd4-48f1-8550-6727b95fffd9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message" : "Flight deleted by ID (but not really"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="0f93f976-60b2-4bd0-8883-f0b265594f24" message="Delete flight by id executed completely"/>
+	</flow>
+</mule>
